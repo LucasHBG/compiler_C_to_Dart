@@ -140,7 +140,9 @@ SELECT_STMT : IF '(' EXPRESSION  ')' '{' STMTS '}' {
                 s_condicao_logica->filhos[0] = $3;
                 $$->filhos[0] = s_condicao_logica;
                 
-                $$->filhos[1] = $6;
+                syntaticno *s_if_stmts = novo_syntaticno("if_stmts", 1);
+                s_if_stmts->filhos[0] = $6;
+                $$->filhos[1] = s_if_stmts;
               }
 
             | IF '(' EXPRESSION  ')' '{' STMTS '}' ELSE '{' STMTS '}' {
@@ -156,15 +158,13 @@ SELECT_STMT : IF '(' EXPRESSION  ')' '{' STMTS '}' {
                 s_condicao_logica->filhos[0] = $3;
                 $$->filhos[0] = s_condicao_logica;
 
-                $$->filhos[1] = $6;
-                // syntaticno *s_if_stmts = novo_syntaticno("if_stmts", 1);
-                // s_if_stmts->filhos[1] = $6;
-                // $$->filhos[1] = s_if_stmts;
+                syntaticno *s_if_stmts = novo_syntaticno("if_stmts", 1);
+                s_if_stmts->filhos[0] = $6;
+                $$->filhos[1] = s_if_stmts;
 
-                $$->filhos[2] = $10;
-                // syntaticno *s_else_stmts = novo_syntaticno("else_stmts", 1);
-                // s_else_stmts->filhos[2] = $10;
-                // $$->filhos[2] = s_else_stmts;
+                syntaticno *s_else_stmts = novo_syntaticno("else_stmts", 1);
+                s_else_stmts->filhos[0] = $10;
+                $$->filhos[2] = s_else_stmts;
               }
 ;
 

@@ -563,9 +563,9 @@ static const yytype_int8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    83,    83,   102,   108,   112,   127,   130,   139,   161,
-     162,   165,   172,   179,   185,   191,   197,   203,   206,   213,
-     222,   225,   232,   237
+       0,    83,    83,   102,   108,   112,   127,   130,   146,   171,
+     172,   175,   182,   189,   195,   201,   207,   213,   216,   223,
+     232,   235,   242,   247
 };
 #endif
 
@@ -1496,128 +1496,138 @@ yyreduce:
   case 7: /* SELECT_STMT: IF '(' EXPRESSION ')' '{' STMTS '}'  */
 #line 130 "aritimetica.y"
                                                    {
+                /*
+                 * cria nó identificando o bloco com "if"
+                */
                 (yyval.no) = novo_syntaticno("if_block", 2);
+
+                /*
+                 * cria nó identificando o bloco com a condicao logica para o "if"
+                */
                 syntaticno *s_condicao_logica = novo_syntaticno("condicao_logica", 1);
                 s_condicao_logica->filhos[0] = (yyvsp[-4].no);
                 (yyval.no)->filhos[0] = s_condicao_logica;
-                //$$->filhos[0] = $3;
+                
                 (yyval.no)->filhos[1] = (yyvsp[-1].no);
               }
-#line 1507 "aritimetica.tab.c"
+#line 1514 "aritimetica.tab.c"
     break;
 
   case 8: /* SELECT_STMT: IF '(' EXPRESSION ')' '{' STMTS '}' ELSE '{' STMTS '}'  */
-#line 139 "aritimetica.y"
+#line 146 "aritimetica.y"
                                                                       {
                 /*
-                 * cria ramo identificando o bloco com if {} else {}
+                 * cria nó identificando o bloco com "if" {} "else" {}
                 */
                 (yyval.no) = novo_syntaticno("if_else_block", 3);
 
+                /*
+                 * cria nó identificando o bloco com a condicao logica para o "if"
+                */
                 syntaticno *s_condicao_logica = novo_syntaticno("condicao_logica", 1);
                 s_condicao_logica->filhos[0] = (yyvsp[-8].no);
                 (yyval.no)->filhos[0] = s_condicao_logica;
 
-                (yyval.no)->filhos[1] = (yyvsp[-5].no);
-                // syntaticno *s_if_stmts = novo_syntaticno("if_stmts", 1);
-                // s_if_stmts->filhos[1] = $6;
-                // $$->filhos[1] = s_if_stmts;
+                // $$->filhos[1] = $6;
+                syntaticno *s_if_stmts = novo_syntaticno("if_stmts", 1);
+                s_if_stmts->filhos[0] = (yyvsp[-5].no);
+                (yyval.no)->filhos[1] = s_if_stmts;
 
-                (yyval.no)->filhos[2] = (yyvsp[-1].no);
-                // syntaticno *s_else_stmts = novo_syntaticno("else_stmts", 1);
-                // s_else_stmts->filhos[2] = $10;
-                // $$->filhos[2] = s_else_stmts;
+                // $$->filhos[2] = $10;
+                syntaticno *s_else_stmts = novo_syntaticno("else_stmts", 1);
+                s_else_stmts->filhos[0] = (yyvsp[-1].no);
+                (yyval.no)->filhos[2] = s_else_stmts;
               }
-#line 1532 "aritimetica.tab.c"
+#line 1542 "aritimetica.tab.c"
     break;
 
   case 9: /* ARITHMETIC: EXPRESSION  */
-#line 161 "aritimetica.y"
+#line 171 "aritimetica.y"
                         { (yyval.no) = (yyvsp[0].no); }
-#line 1538 "aritimetica.tab.c"
+#line 1548 "aritimetica.tab.c"
     break;
 
   case 11: /* EXPRESSION: EXPRESSION '+' TERM  */
-#line 165 "aritimetica.y"
+#line 175 "aritimetica.y"
                                  {
                 (yyval.no) = novo_syntaticno("+", 2);
                 // $1 é EXPRESSION e $3 é TERM
                 (yyval.no)->filhos[0] = (yyvsp[-2].no);
                 (yyval.no)->filhos[1] = (yyvsp[0].no);
              }
-#line 1549 "aritimetica.tab.c"
+#line 1559 "aritimetica.tab.c"
     break;
 
   case 12: /* EXPRESSION: EXPRESSION '-' TERM  */
-#line 172 "aritimetica.y"
+#line 182 "aritimetica.y"
                                  {
                 (yyval.no) = novo_syntaticno("-", 2);
                 // $1 é EXPRESSION e $3 é TERM
                 (yyval.no)->filhos[0] = (yyvsp[-2].no);
                 (yyval.no)->filhos[1] = (yyvsp[0].no);
              }
-#line 1560 "aritimetica.tab.c"
-    break;
-
-  case 13: /* EXPRESSION: EXPRESSION OR_OP TERM  */
-#line 179 "aritimetica.y"
-                                   {
-               (yyval.no) = novo_syntaticno("||", 2);
-               (yyval.no)->filhos[0] = (yyvsp[-2].no);
-               (yyval.no)->filhos[1] = (yyvsp[0].no);
-             }
 #line 1570 "aritimetica.tab.c"
     break;
 
-  case 14: /* EXPRESSION: EXPRESSION AND_OP TERM  */
-#line 185 "aritimetica.y"
-                                    {
-               (yyval.no) = novo_syntaticno("&&", 2);
+  case 13: /* EXPRESSION: EXPRESSION OR_OP TERM  */
+#line 189 "aritimetica.y"
+                                   {
+               (yyval.no) = novo_syntaticno("||", 2);
                (yyval.no)->filhos[0] = (yyvsp[-2].no);
                (yyval.no)->filhos[1] = (yyvsp[0].no);
              }
 #line 1580 "aritimetica.tab.c"
     break;
 
-  case 15: /* EXPRESSION: EXPRESSION EQ_OP TERM  */
-#line 191 "aritimetica.y"
-                                   {
-               (yyval.no) = novo_syntaticno("==", 2);
+  case 14: /* EXPRESSION: EXPRESSION AND_OP TERM  */
+#line 195 "aritimetica.y"
+                                    {
+               (yyval.no) = novo_syntaticno("&&", 2);
                (yyval.no)->filhos[0] = (yyvsp[-2].no);
                (yyval.no)->filhos[1] = (yyvsp[0].no);
              }
 #line 1590 "aritimetica.tab.c"
     break;
 
-  case 16: /* EXPRESSION: EXPRESSION NE_OP TERM  */
-#line 197 "aritimetica.y"
+  case 15: /* EXPRESSION: EXPRESSION EQ_OP TERM  */
+#line 201 "aritimetica.y"
                                    {
-               (yyval.no) = novo_syntaticno("!=", 2);
+               (yyval.no) = novo_syntaticno("==", 2);
                (yyval.no)->filhos[0] = (yyvsp[-2].no);
                (yyval.no)->filhos[1] = (yyvsp[0].no);
              }
 #line 1600 "aritimetica.tab.c"
     break;
 
+  case 16: /* EXPRESSION: EXPRESSION NE_OP TERM  */
+#line 207 "aritimetica.y"
+                                   {
+               (yyval.no) = novo_syntaticno("!=", 2);
+               (yyval.no)->filhos[0] = (yyvsp[-2].no);
+               (yyval.no)->filhos[1] = (yyvsp[0].no);
+             }
+#line 1610 "aritimetica.tab.c"
+    break;
+
   case 17: /* EXPRESSION: TERM  */
-#line 203 "aritimetica.y"
+#line 213 "aritimetica.y"
                   { (yyval.no) = (yyvsp[0].no); }
-#line 1606 "aritimetica.tab.c"
+#line 1616 "aritimetica.tab.c"
     break;
 
   case 18: /* TERM: TERM '*' FACTOR  */
-#line 206 "aritimetica.y"
+#line 216 "aritimetica.y"
                        {
             (yyval.no) = novo_syntaticno("*", 2);
             // $1 é TERM e $3 é FACTOR
             (yyval.no)->filhos[0] = (yyvsp[-2].no);
             (yyval.no)->filhos[1] = (yyvsp[0].no);
          }
-#line 1617 "aritimetica.tab.c"
+#line 1627 "aritimetica.tab.c"
     break;
 
   case 19: /* TERM: TERM '/' FACTOR  */
-#line 213 "aritimetica.y"
+#line 223 "aritimetica.y"
                        {
             (yyval.no) = novo_syntaticno("/", 2);
             // $1 é TERM e $3 é FACTOR
@@ -1626,37 +1636,37 @@ yyreduce:
 
 
          }
-#line 1630 "aritimetica.tab.c"
+#line 1640 "aritimetica.tab.c"
     break;
 
   case 20: /* TERM: FACTOR  */
-#line 222 "aritimetica.y"
+#line 232 "aritimetica.y"
               { (yyval.no) = (yyvsp[0].no); }
-#line 1636 "aritimetica.tab.c"
+#line 1646 "aritimetica.tab.c"
     break;
 
   case 21: /* FACTOR: '(' EXPRESSION ')'  */
-#line 225 "aritimetica.y"
+#line 235 "aritimetica.y"
                             {
             // $$ = novo_syntaticno("()", 1);
             //$$->filhos[0] = $2;
             //Podemos descartar os parenteses durante o processo de compilação
             (yyval.no) = (yyvsp[-1].no);
          }
-#line 1647 "aritimetica.tab.c"
+#line 1657 "aritimetica.tab.c"
     break;
 
   case 22: /* FACTOR: NUMBER  */
-#line 232 "aritimetica.y"
+#line 242 "aritimetica.y"
                 {
            (yyval.no) = novo_syntaticno("const", 0);
            (yyval.no)->constValue = (yyvsp[0].valor);
          }
-#line 1656 "aritimetica.tab.c"
+#line 1666 "aritimetica.tab.c"
     break;
 
   case 23: /* FACTOR: IDENTIFIER  */
-#line 237 "aritimetica.y"
+#line 247 "aritimetica.y"
                     {
             //O $1 significa que é o primeiro argumento da regra, ou seja, o campo IDENTIFIER nesse caso.
             //Se fosse uma regra com 3 campos, por exemplo IDENTIFIER '+' FACTOR, teriamos 3 argumentos $1, $2 e $3 respectivamente
@@ -1668,11 +1678,11 @@ yyreduce:
             (yyval.no) = novo_syntaticno("IDENTIFIER", 0);
             (yyval.no)->sim = s;
          }
-#line 1672 "aritimetica.tab.c"
+#line 1682 "aritimetica.tab.c"
     break;
 
 
-#line 1676 "aritimetica.tab.c"
+#line 1686 "aritimetica.tab.c"
 
       default: break;
     }
@@ -1897,7 +1907,7 @@ yyreturn:
   return yyresult;
 }
 
-#line 251 "aritimetica.y"
+#line 261 "aritimetica.y"
 
 
 int yywrap(){
