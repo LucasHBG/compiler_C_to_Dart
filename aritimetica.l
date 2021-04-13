@@ -5,7 +5,7 @@
 %%
 
 [ \t\n\r]               {}
-"//".*                  { //ignorar         }
+"//".*                  { /* ignora */ }
 "if"                    { return(IF);       }
 "else"                  { return(ELSE);     }
 "for"                   { return(FOR);      }

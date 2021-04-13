@@ -71,7 +71,7 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 58 "aritimetica.y"
+#line 61 "aritimetica.y"
 
     char *nome;
     int valor;

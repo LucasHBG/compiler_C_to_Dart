@@ -1,4 +1,2 @@
-B = a+b+(d/3)*(a/c)*(f/b)
-C = f + g / 4
-D = B + C
-E = D + 10
+if (a + b) { d = d } else { p = d }
+if (a + b) { d = d }

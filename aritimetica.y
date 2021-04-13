@@ -128,16 +128,43 @@ STMT : IDENTIFIER '=' ARITHMETIC {
 ;
 
 SELECT_STMT : IF '(' EXPRESSION  ')' '{' STMTS '}' {
-                $$ = novo_syntaticno("ifblock", 2);
-                $$->filhos[0] = $3;
+                /*
+                 * cria nó identificando o bloco com "if"
+                */
+                $$ = novo_syntaticno("if_block", 2);
+
+                /*
+                 * cria nó identificando o bloco com a condicao logica para o "if"
+                */
+                syntaticno *s_condicao_logica = novo_syntaticno("condicao_logica", 1);
+                s_condicao_logica->filhos[0] = $3;
+                $$->filhos[0] = s_condicao_logica;
+                
                 $$->filhos[1] = $6;
               }
 
             | IF '(' EXPRESSION  ')' '{' STMTS '}' ELSE '{' STMTS '}' {
-                $$ = novo_syntaticno("ifelseblock", 3);
-                $$->filhos[0] = $3;
+                /*
+                 * cria nó identificando o bloco com "if" {} "else" {}
+                */
+                $$ = novo_syntaticno("if_else_block", 3);
+
+                /*
+                 * cria nó identificando o bloco com a condicao logica para o "if"
+                */
+                syntaticno *s_condicao_logica = novo_syntaticno("condicao_logica", 1);
+                s_condicao_logica->filhos[0] = $3;
+                $$->filhos[0] = s_condicao_logica;
+
                 $$->filhos[1] = $6;
+                // syntaticno *s_if_stmts = novo_syntaticno("if_stmts", 1);
+                // s_if_stmts->filhos[1] = $6;
+                // $$->filhos[1] = s_if_stmts;
+
                 $$->filhos[2] = $10;
+                // syntaticno *s_else_stmts = novo_syntaticno("else_stmts", 1);
+                // s_else_stmts->filhos[2] = $10;
+                // $$->filhos[2] = s_else_stmts;
               }
 ;
 

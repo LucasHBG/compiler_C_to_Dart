@@ -749,7 +749,7 @@ YY_RULE_SETUP
 case 2:
 YY_RULE_SETUP
 #line 8 "aritimetica.l"
-{ //ignorar         }
+{ /* ignora */ }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
