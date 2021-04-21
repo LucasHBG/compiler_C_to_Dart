@@ -9,6 +9,8 @@
 "if"                    { return(IF);       }
 "else"                  { return(ELSE);     }
 "for"                   { return(FOR);      }
+"do"                    { return(DO);       }
+"while"                 { return(WHILE);    }
 
 "+"                     { return '+';       }
 "-"                     { return '-';       }
@@ -20,8 +22,10 @@
 "=="                    { return(EQ_OP);    }
 "!="                    { return(NE_OP);    }
 ";"                     { return ';';       }
-")"                     { return ')';       }
+"{"                     { return '{';       }
 "("                     { return '(';       }
+")"                     { return ')';       }
+"}"                     { return '}';       }
 
 [0-9]+ { 
     //usar atoi para converter de string para inteiro

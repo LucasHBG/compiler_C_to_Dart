@@ -1,2 +1,7 @@
-if (a + b) { d = d } else { p = d }
+if (a + b) { 
+    d = d 
+} else { 
+    p = d 
+}
+
 if (a + b) { d = d }

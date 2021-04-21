@@ -59,10 +59,12 @@ extern int yydebug;
     IF = 260,                      /* IF  */
     ELSE = 261,                    /* ELSE  */
     FOR = 262,                     /* FOR  */
-    AND_OP = 263,                  /* AND_OP  */
-    OR_OP = 264,                   /* OR_OP  */
-    EQ_OP = 265,                   /* EQ_OP  */
-    NE_OP = 266                    /* NE_OP  */
+    DO = 263,                      /* DO  */
+    WHILE = 264,                   /* WHILE  */
+    AND_OP = 265,                  /* AND_OP  */
+    OR_OP = 266,                   /* OR_OP  */
+    EQ_OP = 267,                   /* EQ_OP  */
+    NE_OP = 268                    /* NE_OP  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -71,13 +73,13 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 61 "aritimetica.y"
+#line 63 "aritimetica.y"
 
     char *nome;
     int valor;
     struct syntaticno *no;
 
-#line 81 "aritimetica.tab.h"
+#line 83 "aritimetica.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

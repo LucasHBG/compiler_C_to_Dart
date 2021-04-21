@@ -78,7 +78,7 @@ int yyerror(const char *s);
 int yylex(void);
 int errorc = 0;
 
-enum sno_type { NO_GENERIC, NO_STMTS, NO_ATTRIB, NO_GETVAR };
+enum sno_type { NO_GENERIC, NO_STMTS, NO_ATTRIB, NO_GETVAR, NO_CONST, NO_BINARY_OPER };
 
 typedef struct {
     char *nome;
@@ -100,6 +100,7 @@ struct syntaticno {
     enum sno_type type;
     int constValue;
     int qtdFilhos;
+    bool declara_var;
 
     //parte recursiva para criar estruturas dinâmicas evitando o uso de alocamento da linguagem C
     struct syntaticno *filhos[1];
@@ -123,9 +124,10 @@ simbolo *simbolo_novo(char *nome, int token);
 simbolo *simbolo_existe(char *nome);
 syntaticno *novo_syntaticno(char *label, int filhos);
 void debug(syntaticno *root);
+void translate(syntaticno *root);
 
 
-#line 129 "aritimetica.tab.c"
+#line 131 "aritimetica.tab.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -161,28 +163,31 @@ enum yysymbol_kind_t
   YYSYMBOL_IF = 5,                         /* IF  */
   YYSYMBOL_ELSE = 6,                       /* ELSE  */
   YYSYMBOL_FOR = 7,                        /* FOR  */
-  YYSYMBOL_AND_OP = 8,                     /* AND_OP  */
-  YYSYMBOL_OR_OP = 9,                      /* OR_OP  */
-  YYSYMBOL_EQ_OP = 10,                     /* EQ_OP  */
-  YYSYMBOL_NE_OP = 11,                     /* NE_OP  */
-  YYSYMBOL_12_ = 12,                       /* '='  */
-  YYSYMBOL_13_ = 13,                       /* '('  */
-  YYSYMBOL_14_ = 14,                       /* ')'  */
-  YYSYMBOL_15_ = 15,                       /* '{'  */
-  YYSYMBOL_16_ = 16,                       /* '}'  */
-  YYSYMBOL_17_ = 17,                       /* '+'  */
-  YYSYMBOL_18_ = 18,                       /* '-'  */
-  YYSYMBOL_19_ = 19,                       /* '*'  */
-  YYSYMBOL_20_ = 20,                       /* '/'  */
-  YYSYMBOL_YYACCEPT = 21,                  /* $accept  */
-  YYSYMBOL_PROGRAM = 22,                   /* PROGRAM  */
-  YYSYMBOL_STMTS = 23,                     /* STMTS  */
-  YYSYMBOL_STMT = 24,                      /* STMT  */
-  YYSYMBOL_SELECT_STMT = 25,               /* SELECT_STMT  */
-  YYSYMBOL_ARITHMETIC = 26,                /* ARITHMETIC  */
-  YYSYMBOL_EXPRESSION = 27,                /* EXPRESSION  */
-  YYSYMBOL_TERM = 28,                      /* TERM  */
-  YYSYMBOL_FACTOR = 29                     /* FACTOR  */
+  YYSYMBOL_DO = 8,                         /* DO  */
+  YYSYMBOL_WHILE = 9,                      /* WHILE  */
+  YYSYMBOL_AND_OP = 10,                    /* AND_OP  */
+  YYSYMBOL_OR_OP = 11,                     /* OR_OP  */
+  YYSYMBOL_EQ_OP = 12,                     /* EQ_OP  */
+  YYSYMBOL_NE_OP = 13,                     /* NE_OP  */
+  YYSYMBOL_14_ = 14,                       /* '='  */
+  YYSYMBOL_15_ = 15,                       /* '('  */
+  YYSYMBOL_16_ = 16,                       /* ')'  */
+  YYSYMBOL_17_ = 17,                       /* '{'  */
+  YYSYMBOL_18_ = 18,                       /* '}'  */
+  YYSYMBOL_19_ = 19,                       /* '+'  */
+  YYSYMBOL_20_ = 20,                       /* '-'  */
+  YYSYMBOL_21_ = 21,                       /* '*'  */
+  YYSYMBOL_22_ = 22,                       /* '/'  */
+  YYSYMBOL_YYACCEPT = 23,                  /* $accept  */
+  YYSYMBOL_PROGRAM = 24,                   /* PROGRAM  */
+  YYSYMBOL_STMTS = 25,                     /* STMTS  */
+  YYSYMBOL_STMT = 26,                      /* STMT  */
+  YYSYMBOL_SELECT_STMT = 27,               /* SELECT_STMT  */
+  YYSYMBOL_ITERATION_STMT = 28,            /* ITERATION_STMT  */
+  YYSYMBOL_ARITHMETIC = 29,                /* ARITHMETIC  */
+  YYSYMBOL_EXPRESSION = 30,                /* EXPRESSION  */
+  YYSYMBOL_TERM = 31,                      /* TERM  */
+  YYSYMBOL_FACTOR = 32                     /* FACTOR  */
 };
 typedef enum yysymbol_kind_t yysymbol_kind_t;
 
@@ -502,21 +507,21 @@ union yyalloc
 #endif /* !YYCOPY_NEEDED */
 
 /* YYFINAL -- State number of the termination state.  */
-#define YYFINAL  9
+#define YYFINAL  12
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   55
+#define YYLAST   69
 
 /* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  21
+#define YYNTOKENS  23
 /* YYNNTS -- Number of nonterminals.  */
-#define YYNNTS  9
+#define YYNNTS  10
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  23
+#define YYNRULES  25
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  46
+#define YYNSTATES  55
 
 /* YYMAXUTOK -- Last valid token kind.  */
-#define YYMAXUTOK   266
+#define YYMAXUTOK   268
 
 
 /* YYTRANSLATE(TOKEN-NUM) -- Symbol number corresponding to TOKEN-NUM
@@ -534,15 +539,15 @@ static const yytype_int8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-      13,    14,    19,    17,     2,    18,     2,    20,     2,     2,
+      15,    16,    21,    19,     2,    20,     2,    22,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,    12,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,    14,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,    15,     2,    16,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,    17,     2,    18,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
@@ -556,16 +561,16 @@ static const yytype_int8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
-       5,     6,     7,     8,     9,    10,    11
+       5,     6,     7,     8,     9,    10,    11,    12,    13
 };
 
 #if YYDEBUG
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
-static const yytype_uint8 yyrline[] =
+static const yytype_int16 yyrline[] =
 {
-       0,    83,    83,   102,   108,   112,   127,   130,   146,   171,
-     172,   175,   182,   189,   195,   201,   207,   213,   216,   223,
-     232,   235,   242,   247
+       0,    86,    86,   107,   114,   119,   132,   134,   138,   156,
+     186,   192,   193,   200,   208,   216,   223,   230,   237,   244,
+     248,   256,   264,   268,   277,   283
 };
 #endif
 
@@ -582,10 +587,10 @@ static const char *yysymbol_name (yysymbol_kind_t yysymbol) YY_ATTRIBUTE_UNUSED;
 static const char *const yytname[] =
 {
   "\"end of file\"", "error", "\"invalid token\"", "NUMBER", "IDENTIFIER",
-  "IF", "ELSE", "FOR", "AND_OP", "OR_OP", "EQ_OP", "NE_OP", "'='", "'('",
-  "')'", "'{'", "'}'", "'+'", "'-'", "'*'", "'/'", "$accept", "PROGRAM",
-  "STMTS", "STMT", "SELECT_STMT", "ARITHMETIC", "EXPRESSION", "TERM",
-  "FACTOR", YY_NULLPTR
+  "IF", "ELSE", "FOR", "DO", "WHILE", "AND_OP", "OR_OP", "EQ_OP", "NE_OP",
+  "'='", "'('", "')'", "'{'", "'}'", "'+'", "'-'", "'*'", "'/'", "$accept",
+  "PROGRAM", "STMTS", "STMT", "SELECT_STMT", "ITERATION_STMT",
+  "ARITHMETIC", "EXPRESSION", "TERM", "FACTOR", YY_NULLPTR
 };
 
 static const char *
@@ -601,17 +606,17 @@ yysymbol_name (yysymbol_kind_t yysymbol)
 static const yytype_int16 yytoknum[] =
 {
        0,   256,   257,   258,   259,   260,   261,   262,   263,   264,
-     265,   266,    61,    40,    41,   123,   125,    43,    45,    42,
-      47
+     265,   266,   267,   268,    61,    40,    41,   123,   125,    43,
+      45,    42,    47
 };
 #endif
 
-#define YYPACT_NINF (-6)
+#define YYPACT_NINF (-22)
 
 #define yypact_value_is_default(Yyn) \
   ((Yyn) == YYPACT_NINF)
 
-#define YYTABLE_NINF (-10)
+#define YYTABLE_NINF (-12)
 
 #define yytable_value_is_error(Yyn) \
   0
@@ -620,11 +625,12 @@ static const yytype_int16 yytoknum[] =
      STATE-NUM.  */
 static const yytype_int8 yypact[] =
 {
-       3,     2,    15,    33,    -6,     3,    -6,     0,     0,    -6,
-      -6,    -6,    -6,     0,    -6,     1,    -4,    -6,    12,    31,
-      -6,     0,     0,     0,     0,     0,     0,     0,     0,    16,
-      -6,    -4,    -4,    -4,    -4,    -4,    -4,    -6,    -6,     3,
-      20,    37,    22,     3,    28,    -6
+      -2,    -1,     6,    10,    31,   -22,    -2,   -22,   -22,    15,
+      15,    -2,   -22,   -22,   -22,   -22,    15,   -22,     4,    18,
+     -22,    16,    21,    32,   -22,    15,    15,    15,    15,    15,
+      15,    15,    15,    17,    37,   -22,    18,    18,    18,    18,
+      18,    18,   -22,   -22,    -2,    34,    29,    15,    44,    43,
+      40,   -22,    -2,    42,   -22
 };
 
   /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -632,23 +638,24 @@ static const yytype_int8 yypact[] =
      means the default is an error.  */
 static const yytype_int8 yydefact[] =
 {
-       0,     0,     0,     0,     2,     4,     6,     0,     0,     1,
-       3,    22,    23,     0,     5,     0,    17,    20,     0,     0,
-      10,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-      21,    14,    13,    15,    16,    11,    12,    18,    19,     0,
-       0,     7,     0,     0,     0,     8
+       0,     0,     0,     0,     0,     2,     4,     6,     7,     0,
+       0,     0,     1,     3,    24,    25,     0,     5,     0,    19,
+      22,     0,     0,     0,    12,     0,     0,     0,     0,     0,
+       0,     0,     0,     0,     0,    23,    16,    15,    17,    18,
+      13,    14,    20,    21,     0,     0,     0,     0,     8,     0,
+       0,    10,     0,     0,     9
 };
 
   /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-      -6,    -6,    -5,    -6,    -6,    -6,    19,    29,    -3
+     -22,   -22,    52,   -11,   -22,   -22,   -22,    -9,    39,   -21
 };
 
   /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-       0,     3,     4,     5,     6,    14,    15,    16,    17
+       0,     4,     5,     6,     7,     8,    17,    18,    19,    20
 };
 
   /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -656,49 +663,52 @@ static const yytype_int8 yydefgoto[] =
      number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_int8 yytable[] =
 {
-      10,    -9,    20,    11,    12,    -9,    -9,     1,     2,    21,
-      22,    23,    24,    13,     7,    27,    28,    -9,    25,    26,
-      21,    22,    23,    24,    37,    38,    29,    18,     8,    25,
-      26,    39,    19,     9,    40,     0,    41,    43,    44,    21,
-      22,    23,    24,    42,    45,    30,     0,     0,    25,    26,
-      31,    32,    33,    34,    35,    36
+      22,    21,     1,     2,   -11,    24,     3,    23,   -11,   -11,
+      42,    43,   -11,     9,    25,    26,    27,    28,    14,    15,
+     -11,    10,   -11,    29,    30,    11,    25,    26,    27,    28,
+      16,    12,    33,    46,    44,    29,    30,    34,    49,    31,
+      32,    53,    25,    26,    27,    28,    45,    48,    35,    47,
+      50,    29,    30,    25,    26,    27,    28,    52,    13,    51,
+      54,     0,    29,    30,    36,    37,    38,    39,    40,    41
 };
 
 static const yytype_int8 yycheck[] =
 {
-       5,     0,     1,     3,     4,     4,     5,     4,     5,     8,
-       9,    10,    11,    13,    12,    19,    20,    16,    17,    18,
-       8,     9,    10,    11,    27,    28,    14,     8,    13,    17,
-      18,    15,    13,     0,    39,    -1,    16,    15,    43,     8,
-       9,    10,    11,     6,    16,    14,    -1,    -1,    17,    18,
-      21,    22,    23,    24,    25,    26
+      11,    10,     4,     5,     0,     1,     8,    16,     4,     5,
+      31,    32,     8,    14,    10,    11,    12,    13,     3,     4,
+      16,    15,    18,    19,    20,    15,    10,    11,    12,    13,
+      15,     0,    16,    44,    17,    19,    20,    16,    47,    21,
+      22,    52,    10,    11,    12,    13,     9,    18,    16,    15,
+       6,    19,    20,    10,    11,    12,    13,    17,     6,    16,
+      18,    -1,    19,    20,    25,    26,    27,    28,    29,    30
 };
 
   /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
      symbol of state STATE-NUM.  */
 static const yytype_int8 yystos[] =
 {
-       0,     4,     5,    22,    23,    24,    25,    12,    13,     0,
-      23,     3,     4,    13,    26,    27,    28,    29,    27,    27,
-       1,     8,     9,    10,    11,    17,    18,    19,    20,    14,
-      14,    28,    28,    28,    28,    28,    28,    29,    29,    15,
-      23,    16,     6,    15,    23,    16
+       0,     4,     5,     8,    24,    25,    26,    27,    28,    14,
+      15,    15,     0,    25,     3,     4,    15,    29,    30,    31,
+      32,    30,    26,    30,     1,    10,    11,    12,    13,    19,
+      20,    21,    22,    16,    16,    16,    31,    31,    31,    31,
+      31,    31,    32,    32,    17,     9,    26,    15,    18,    30,
+       6,    16,    17,    26,    18
 };
 
   /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
 static const yytype_int8 yyr1[] =
 {
-       0,    21,    22,    23,    23,    24,    24,    25,    25,    26,
-      26,    27,    27,    27,    27,    27,    27,    27,    28,    28,
-      28,    29,    29,    29
+       0,    23,    24,    25,    25,    26,    26,    26,    27,    27,
+      28,    29,    29,    30,    30,    30,    30,    30,    30,    30,
+      31,    31,    31,    32,    32,    32
 };
 
   /* YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.  */
 static const yytype_int8 yyr2[] =
 {
-       0,     2,     1,     2,     1,     3,     1,     7,    11,     1,
-       2,     3,     3,     3,     3,     3,     3,     1,     3,     3,
-       1,     3,     1,     1
+       0,     2,     1,     2,     1,     3,     1,     1,     7,    11,
+       8,     1,     2,     3,     3,     3,     3,     3,     3,     1,
+       3,     3,     1,     3,     1,     1
 };
 
 
@@ -1436,7 +1446,7 @@ yyreduce:
   switch (yyn)
     {
   case 2: /* PROGRAM: STMTS  */
-#line 83 "aritimetica.y"
+#line 86 "aritimetica.y"
                 { 
             if(errorc > 0)
                 printf("%d erro(s) encontrados\n", errorc);
@@ -1452,33 +1462,32 @@ yyreduce:
                 visitor_leaf_first(&root, collapse_stmts);
                 visitor_leaf_first(&root, check_declared_vars);
                 debug(root);
+                translate(root);
             }
-          }
-#line 1458 "aritimetica.tab.c"
+        }
+#line 1469 "aritimetica.tab.c"
     break;
 
   case 3: /* STMTS: STMT STMTS  */
-#line 102 "aritimetica.y"
-                   {
+#line 107 "aritimetica.y"
+                     {
             (yyval.no) = novo_syntaticno("stmts", 2);
             (yyval.no)->type = NO_STMTS;
             (yyval.no)->filhos[0] = (yyvsp[-1].no);
             (yyval.no)->filhos[1] = (yyvsp[0].no);
         }
-#line 1469 "aritimetica.tab.c"
+#line 1480 "aritimetica.tab.c"
     break;
 
   case 4: /* STMTS: STMT  */
-#line 108 "aritimetica.y"
-             { (yyval.no) = (yyvsp[0].no); }
-#line 1475 "aritimetica.tab.c"
+#line 114 "aritimetica.y"
+               { (yyval.no) = (yyvsp[0].no); }
+#line 1486 "aritimetica.tab.c"
     break;
 
   case 5: /* STMT: IDENTIFIER '=' ARITHMETIC  */
-#line 112 "aritimetica.y"
-                                 {
-            //char aux[20];
-            //sprintf(aux, "%s=", $1);
+#line 119 "aritimetica.y"
+                                    {
             simbolo *s = simbolo_existe((yyvsp[-2].nome));
             if(!s)
                 s = simbolo_novo((yyvsp[-2].nome), IDENTIFIER);
@@ -1490,199 +1499,227 @@ yyreduce:
             (yyval.no)->filhos[1] = (yyvsp[0].no);
             (yyval.no)->type = NO_ATTRIB;
         }
-#line 1494 "aritimetica.tab.c"
+#line 1503 "aritimetica.tab.c"
     break;
 
-  case 7: /* SELECT_STMT: IF '(' EXPRESSION ')' '{' STMTS '}'  */
-#line 130 "aritimetica.y"
-                                                   {
-                /*
-                 * cria nó identificando o bloco com "if"
-                */
-                (yyval.no) = novo_syntaticno("if_block", 2);
+  case 8: /* SELECT_STMT: IF '(' EXPRESSION ')' '{' STMT '}'  */
+#line 138 "aritimetica.y"
+                                              {
+            /*
+             * cria nó identificando o bloco com "if"
+            */
+            (yyval.no) = novo_syntaticno("if_block", 2);
 
-                /*
-                 * cria nó identificando o bloco com a condicao logica para o "if"
-                */
-                syntaticno *s_condicao_logica = novo_syntaticno("condicao_logica", 1);
-                s_condicao_logica->filhos[0] = (yyvsp[-4].no);
-                (yyval.no)->filhos[0] = s_condicao_logica;
+            /*
+             * cria nó identificando o bloco com a condicao logica para o "if"
+            */
+            syntaticno *s_condicao_logica = novo_syntaticno("condicao_logica", 1);
+            s_condicao_logica->filhos[0] = (yyvsp[-4].no);
+            (yyval.no)->filhos[0] = s_condicao_logica;
                 
-                (yyval.no)->filhos[1] = (yyvsp[-1].no);
-              }
-#line 1514 "aritimetica.tab.c"
+            syntaticno *s_if_stmts = novo_syntaticno("if_stmts", 1);
+            s_if_stmts->filhos[0] = (yyvsp[-1].no);
+            (yyval.no)->filhos[1] = s_if_stmts;
+        }
+#line 1525 "aritimetica.tab.c"
     break;
 
-  case 8: /* SELECT_STMT: IF '(' EXPRESSION ')' '{' STMTS '}' ELSE '{' STMTS '}'  */
-#line 146 "aritimetica.y"
-                                                                      {
-                /*
-                 * cria nó identificando o bloco com "if" {} "else" {}
-                */
-                (yyval.no) = novo_syntaticno("if_else_block", 3);
+  case 9: /* SELECT_STMT: IF '(' EXPRESSION ')' '{' STMT '}' ELSE '{' STMT '}'  */
+#line 156 "aritimetica.y"
+                                                                {
+            /*
+             * cria nó identificando o bloco com "if" {} "else" {}
+            */
+            (yyval.no) = novo_syntaticno("if_else_block", 3);
 
-                /*
-                 * cria nó identificando o bloco com a condicao logica para o "if"
-                */
-                syntaticno *s_condicao_logica = novo_syntaticno("condicao_logica", 1);
-                s_condicao_logica->filhos[0] = (yyvsp[-8].no);
-                (yyval.no)->filhos[0] = s_condicao_logica;
+            /*
+             * cria nó identificando o bloco com a condicao logica do "if"
+            */
+            syntaticno *s_condicao_logica = novo_syntaticno("condicao_logica", 1);
+            s_condicao_logica->filhos[0] = (yyvsp[-8].no);
+            (yyval.no)->filhos[0] = s_condicao_logica;
 
-                // $$->filhos[1] = $6;
-                syntaticno *s_if_stmts = novo_syntaticno("if_stmts", 1);
-                s_if_stmts->filhos[0] = (yyvsp[-5].no);
-                (yyval.no)->filhos[1] = s_if_stmts;
+            /*
+             * cria nó identificando o bloco com o statement para o "if"
+            */
+            syntaticno *s_if_stmts = novo_syntaticno("if_stmts", 1);
+            s_if_stmts->filhos[0] = (yyvsp[-5].no);
+            (yyval.no)->filhos[1] = s_if_stmts;
 
-                // $$->filhos[2] = $10;
-                syntaticno *s_else_stmts = novo_syntaticno("else_stmts", 1);
-                s_else_stmts->filhos[0] = (yyvsp[-1].no);
-                (yyval.no)->filhos[2] = s_else_stmts;
-              }
-#line 1542 "aritimetica.tab.c"
+            /*
+             * cria nó identificando o bloco com o statement para o "else"
+            */
+            syntaticno *s_else_stmts = novo_syntaticno("else_stmts", 1);
+            s_else_stmts->filhos[0] = (yyvsp[-1].no);
+            (yyval.no)->filhos[2] = s_else_stmts;
+        }
+#line 1557 "aritimetica.tab.c"
     break;
 
-  case 9: /* ARITHMETIC: EXPRESSION  */
-#line 171 "aritimetica.y"
-                        { (yyval.no) = (yyvsp[0].no); }
-#line 1548 "aritimetica.tab.c"
+  case 10: /* ITERATION_STMT: DO '(' STMT ')' WHILE '(' EXPRESSION ')'  */
+#line 186 "aritimetica.y"
+                                                   {
+            //syntaticno *s_do_
+        }
+#line 1565 "aritimetica.tab.c"
     break;
 
-  case 11: /* EXPRESSION: EXPRESSION '+' TERM  */
-#line 175 "aritimetica.y"
-                                 {
-                (yyval.no) = novo_syntaticno("+", 2);
-                // $1 é EXPRESSION e $3 é TERM
-                (yyval.no)->filhos[0] = (yyvsp[-2].no);
-                (yyval.no)->filhos[1] = (yyvsp[0].no);
-             }
-#line 1559 "aritimetica.tab.c"
+  case 11: /* ARITHMETIC: EXPRESSION  */
+#line 192 "aritimetica.y"
+                     { (yyval.no) = (yyvsp[0].no); }
+#line 1571 "aritimetica.tab.c"
     break;
 
-  case 12: /* EXPRESSION: EXPRESSION '-' TERM  */
-#line 182 "aritimetica.y"
-                                 {
-                (yyval.no) = novo_syntaticno("-", 2);
-                // $1 é EXPRESSION e $3 é TERM
-                (yyval.no)->filhos[0] = (yyvsp[-2].no);
-                (yyval.no)->filhos[1] = (yyvsp[0].no);
-             }
-#line 1570 "aritimetica.tab.c"
+  case 13: /* EXPRESSION: EXPRESSION '+' TERM  */
+#line 200 "aritimetica.y"
+                              {
+            // $1 é EXPRESSION e $3 é TERM
+            (yyval.no) = novo_syntaticno("+", 2);
+            (yyval.no)->type = NO_BINARY_OPER;
+            (yyval.no)->filhos[0] = (yyvsp[-2].no);
+            (yyval.no)->filhos[1] = (yyvsp[0].no);
+        }
+#line 1583 "aritimetica.tab.c"
     break;
 
-  case 13: /* EXPRESSION: EXPRESSION OR_OP TERM  */
-#line 189 "aritimetica.y"
-                                   {
-               (yyval.no) = novo_syntaticno("||", 2);
-               (yyval.no)->filhos[0] = (yyvsp[-2].no);
-               (yyval.no)->filhos[1] = (yyvsp[0].no);
-             }
-#line 1580 "aritimetica.tab.c"
+  case 14: /* EXPRESSION: EXPRESSION '-' TERM  */
+#line 208 "aritimetica.y"
+                              {
+            // $1 é EXPRESSION e $3 é TERM
+            (yyval.no) = novo_syntaticno("-", 2);
+            (yyval.no)->type = NO_BINARY_OPER;
+            (yyval.no)->filhos[0] = (yyvsp[-2].no);
+            (yyval.no)->filhos[1] = (yyvsp[0].no);
+        }
+#line 1595 "aritimetica.tab.c"
     break;
 
-  case 14: /* EXPRESSION: EXPRESSION AND_OP TERM  */
-#line 195 "aritimetica.y"
-                                    {
-               (yyval.no) = novo_syntaticno("&&", 2);
-               (yyval.no)->filhos[0] = (yyvsp[-2].no);
-               (yyval.no)->filhos[1] = (yyvsp[0].no);
-             }
-#line 1590 "aritimetica.tab.c"
-    break;
-
-  case 15: /* EXPRESSION: EXPRESSION EQ_OP TERM  */
-#line 201 "aritimetica.y"
-                                   {
-               (yyval.no) = novo_syntaticno("==", 2);
-               (yyval.no)->filhos[0] = (yyvsp[-2].no);
-               (yyval.no)->filhos[1] = (yyvsp[0].no);
-             }
-#line 1600 "aritimetica.tab.c"
-    break;
-
-  case 16: /* EXPRESSION: EXPRESSION NE_OP TERM  */
-#line 207 "aritimetica.y"
-                                   {
-               (yyval.no) = novo_syntaticno("!=", 2);
-               (yyval.no)->filhos[0] = (yyvsp[-2].no);
-               (yyval.no)->filhos[1] = (yyvsp[0].no);
-             }
-#line 1610 "aritimetica.tab.c"
-    break;
-
-  case 17: /* EXPRESSION: TERM  */
-#line 213 "aritimetica.y"
-                  { (yyval.no) = (yyvsp[0].no); }
-#line 1616 "aritimetica.tab.c"
-    break;
-
-  case 18: /* TERM: TERM '*' FACTOR  */
+  case 15: /* EXPRESSION: EXPRESSION OR_OP TERM  */
 #line 216 "aritimetica.y"
-                       {
-            (yyval.no) = novo_syntaticno("*", 2);
-            // $1 é TERM e $3 é FACTOR
-            (yyval.no)->filhos[0] = (yyvsp[-2].no);
-            (yyval.no)->filhos[1] = (yyvsp[0].no);
-         }
-#line 1627 "aritimetica.tab.c"
+                                {
+           (yyval.no) = novo_syntaticno("||", 2);
+           (yyval.no)->type = NO_BINARY_OPER;
+           (yyval.no)->filhos[0] = (yyvsp[-2].no);
+           (yyval.no)->filhos[1] = (yyvsp[0].no);
+        }
+#line 1606 "aritimetica.tab.c"
     break;
 
-  case 19: /* TERM: TERM '/' FACTOR  */
+  case 16: /* EXPRESSION: EXPRESSION AND_OP TERM  */
 #line 223 "aritimetica.y"
-                       {
-            (yyval.no) = novo_syntaticno("/", 2);
+                                 {
+           (yyval.no) = novo_syntaticno("&&", 2);
+           (yyval.no)->type = NO_BINARY_OPER;
+           (yyval.no)->filhos[0] = (yyvsp[-2].no);
+           (yyval.no)->filhos[1] = (yyvsp[0].no);
+        }
+#line 1617 "aritimetica.tab.c"
+    break;
+
+  case 17: /* EXPRESSION: EXPRESSION EQ_OP TERM  */
+#line 230 "aritimetica.y"
+                                {
+           (yyval.no) = novo_syntaticno("==", 2);
+           (yyval.no)->type = NO_BINARY_OPER;
+           (yyval.no)->filhos[0] = (yyvsp[-2].no);
+           (yyval.no)->filhos[1] = (yyvsp[0].no);
+        }
+#line 1628 "aritimetica.tab.c"
+    break;
+
+  case 18: /* EXPRESSION: EXPRESSION NE_OP TERM  */
+#line 237 "aritimetica.y"
+                                {
+           (yyval.no) = novo_syntaticno("!=", 2);
+           (yyval.no)->type = NO_BINARY_OPER;
+           (yyval.no)->filhos[0] = (yyvsp[-2].no);
+           (yyval.no)->filhos[1] = (yyvsp[0].no);
+        }
+#line 1639 "aritimetica.tab.c"
+    break;
+
+  case 19: /* EXPRESSION: TERM  */
+#line 244 "aritimetica.y"
+               { (yyval.no) = (yyvsp[0].no); }
+#line 1645 "aritimetica.tab.c"
+    break;
+
+  case 20: /* TERM: TERM '*' FACTOR  */
+#line 248 "aritimetica.y"
+                          {
             // $1 é TERM e $3 é FACTOR
+            (yyval.no) = novo_syntaticno("*", 2);
+            (yyval.no)->type = NO_BINARY_OPER;
             (yyval.no)->filhos[0] = (yyvsp[-2].no);
             (yyval.no)->filhos[1] = (yyvsp[0].no);
-
-
-         }
-#line 1640 "aritimetica.tab.c"
-    break;
-
-  case 20: /* TERM: FACTOR  */
-#line 232 "aritimetica.y"
-              { (yyval.no) = (yyvsp[0].no); }
-#line 1646 "aritimetica.tab.c"
-    break;
-
-  case 21: /* FACTOR: '(' EXPRESSION ')'  */
-#line 235 "aritimetica.y"
-                            {
-            // $$ = novo_syntaticno("()", 1);
-            //$$->filhos[0] = $2;
-            //Podemos descartar os parenteses durante o processo de compilação
-            (yyval.no) = (yyvsp[-1].no);
-         }
+        }
 #line 1657 "aritimetica.tab.c"
     break;
 
-  case 22: /* FACTOR: NUMBER  */
-#line 242 "aritimetica.y"
-                {
-           (yyval.no) = novo_syntaticno("const", 0);
-           (yyval.no)->constValue = (yyvsp[0].valor);
-         }
-#line 1666 "aritimetica.tab.c"
+  case 21: /* TERM: TERM '/' FACTOR  */
+#line 256 "aritimetica.y"
+                          {
+            // $1 é TERM e $3 é FACTOR
+            (yyval.no) = novo_syntaticno("/", 2);
+            (yyval.no)->type = NO_BINARY_OPER;
+            (yyval.no)->filhos[0] = (yyvsp[-2].no);
+            (yyval.no)->filhos[1] = (yyvsp[0].no);
+        }
+#line 1669 "aritimetica.tab.c"
     break;
 
-  case 23: /* FACTOR: IDENTIFIER  */
-#line 247 "aritimetica.y"
-                    {
-            //O $1 significa que é o primeiro argumento da regra, ou seja, o campo IDENTIFIER nesse caso.
-            //Se fosse uma regra com 3 campos, por exemplo IDENTIFIER '+' FACTOR, teriamos 3 argumentos $1, $2 e $3 respectivamente
-            //Aqui vamos retornar os nós de árvore em cada regra
+  case 22: /* TERM: FACTOR  */
+#line 264 "aritimetica.y"
+                 { (yyval.no) = (yyvsp[0].no); }
+#line 1675 "aritimetica.tab.c"
+    break;
+
+  case 23: /* FACTOR: '(' EXPRESSION ')'  */
+#line 268 "aritimetica.y"
+                             {
+            // $$ = novo_syntaticno("()", 1);
+            //$$->filhos[0] = $2;
+            //Podemos descartar os parenteses durante o processo de compilação
+            //ao invés de adicionar os parenteses na árvore, vamos
+            //adicionar ao codigo durante a compilação na função translate_tree()
+            (yyval.no) = (yyvsp[-1].no);
+        }
+#line 1688 "aritimetica.tab.c"
+    break;
+
+  case 24: /* FACTOR: NUMBER  */
+#line 277 "aritimetica.y"
+                 {
+           (yyval.no) = novo_syntaticno("const", 0);
+           (yyval.no)->constValue = (yyvsp[0].valor);
+           (yyval.no)->type = NO_CONST;
+        }
+#line 1698 "aritimetica.tab.c"
+    break;
+
+  case 25: /* FACTOR: IDENTIFIER  */
+#line 283 "aritimetica.y"
+                     {
+            /*
+                O $1 significa que é o primeiro argumento da regra, ou seja,
+                o campo IDENTIFIER nesse caso.
+                Se fosse uma regra com 3 campos, por exemplo IDENTIFIER '+' FACTOR,
+                teriamos 3 argumentos: $1, $2 e $3 respectivamente.
+                Aqui vamos retornar os nós de árvore em cada regra
+            */
             simbolo *s = simbolo_existe((yyvsp[0].nome));
             if(!s)
                 s = simbolo_novo((yyvsp[0].nome), IDENTIFIER);
             //retorna o nó para a variavel que foi expandida e que chamou o IDENTIFIER, o valor 0 significa que ele nao tem filhos na folha 
             (yyval.no) = novo_syntaticno("IDENTIFIER", 0);
+            (yyval.no)->type = NO_GETVAR;
             (yyval.no)->sim = s;
-         }
-#line 1682 "aritimetica.tab.c"
+        }
+#line 1719 "aritimetica.tab.c"
     break;
 
 
-#line 1686 "aritimetica.tab.c"
+#line 1723 "aritimetica.tab.c"
 
       default: break;
     }
@@ -1907,7 +1944,7 @@ yyreturn:
   return yyresult;
 }
 
-#line 261 "aritimetica.y"
+#line 302 "aritimetica.y"
 
 
 int yywrap(){
@@ -1952,6 +1989,7 @@ syntaticno *novo_syntaticno(char *label, int filhos) {
     n->label = label;
     n->qtdFilhos = filhos;
     n->type = NO_GENERIC;
+    n->declara_var = false;
     return n;
 }
 
@@ -1967,6 +2005,58 @@ void print_tree(syntaticno *n){
         print_tree(n->filhos[i]);
     for(int i = 0; i < n->qtdFilhos; i++)
         printf("\tn%d -- n%d\n", n->id, n->filhos[i]->id);
+}
+
+//Traduzindo entrada para codigo em C nesse exemplo
+void translate_tree(syntaticno *no){
+
+    switch(no->type){
+        case NO_ATTRIB:
+            if (no->declara_var)
+                printf("\tint %s = ", no->filhos[0]->sim->nome);
+            else
+                printf("\t %s = ", no->filhos[0]->sim->nome);
+            
+            for(int i = 1; i < no->qtdFilhos; i++)
+                translate_tree(no->filhos[i]);
+
+            printf(";\n");
+            break;
+        
+        case NO_GETVAR:
+            printf(" %s ", no->sim->nome);
+            break;
+
+        case NO_CONST:
+            printf(" %d ", no->constValue);
+            break;
+
+        case NO_BINARY_OPER:
+            //imprime em ordem esquerda -> raiz -> direita
+            printf("(");
+            translate_tree(no->filhos[0]);
+            printf(" %s ", no->label);
+            translate_tree(no->filhos[1]);
+            printf(")");
+            break;
+
+        default:
+            for(int i = 0; i < no->qtdFilhos; i++)
+                translate_tree(no->filhos[i]);
+            break;
+    }
+
+    //função para tratar a raiz
+}
+
+void translate(syntaticno *no){
+    //Aqui traduzo a entrada para linguagem Dart
+    printf("int main(){\n");
+    
+    //vai percorrer a arvore formato esquerda -> direia -> raiz e vai imprimir o codigo dentro da função main()
+    translate_tree(no);
+    
+    printf("}\n");
 }
 
 //Função que irá percorrer a tabela de simbolos e imprimir os encontrados
@@ -1993,7 +2083,7 @@ void visitor_leaf_first(syntaticno **root, visitor_action act){
 
 void collapse_stmts(syntaticno **root, syntaticno *no){
     syntaticno *r = *root;
-    //if (strcmp(r->label, "stmts") == 0 && strcmp(no->label, "stmts") == 0) {
+
     if(r->type == NO_STMTS && no->type == NO_STMTS) {
         int nsize = sizeof(syntaticno);
         nsize += sizeof(syntaticno*) * (r->qtdFilhos-1); 
@@ -2015,7 +2105,10 @@ void check_declared_vars(syntaticno **root, syntaticno *no){
 
     if(no->type == NO_ATTRIB){
         simbolo *s = no->filhos[0]->sim;
-        s->exists = true;
+        if(!s->exists){
+            s->exists = true;
+            no->declara_var = true;
+        }
     }
     else if(no->type == NO_GETVAR){
         if(!no->sim->exists){
