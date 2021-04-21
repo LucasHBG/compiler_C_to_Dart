@@ -9,7 +9,9 @@ int yyerror(const char *s);
 int yylex(void);
 int errorc = 0;
 
-enum sno_type { NO_GENERIC, NO_STMTS, NO_ATTRIB, NO_GETVAR, NO_CONST, NO_BINARY_OPER };
+enum sno_type { NO_GENERIC, NO_STMTS, NO_ATTRIB, NO_GETVAR,
+NO_CONST, NO_BINARY_OPER, NO_IF_SELECTION, NO_IF_ELSE_SELECTION,
+NO_DO_WHILE_ITERATION };
 
 typedef struct {
     char *nome;
@@ -140,6 +142,7 @@ SELECT_STMT
              * cria nó identificando o bloco com "if"
             */
             $$ = novo_syntaticno("if_block", 2);
+            $$->type = NO_IF_SELECTION;
 
             /*
              * cria nó identificando o bloco com a condicao logica para o "if"
@@ -158,6 +161,7 @@ SELECT_STMT
              * cria nó identificando o bloco com "if" {} "else" {}
             */
             $$ = novo_syntaticno("if_else_block", 3);
+            $$->type = NO_IF_ELSE_SELECTION;
 
             /*
              * cria nó identificando o bloco com a condicao logica do "if"
@@ -183,8 +187,14 @@ SELECT_STMT
 ;
 
 ITERATION_STMT 
-        : DO '(' STMT ')' WHILE '(' EXPRESSION ')' {
-            //syntaticno *s_do_
+        : DO '{' STMT '}' WHILE '(' EXPRESSION ')' {
+            /*
+             * cria nó identificando o bloco com "do {} while ();"
+            */
+            $$ = novo_syntaticno("do_while_block", 2);
+            $$->type = NO_DO_WHILE_ITERATION;
+            $$->filhos[0] = $3;
+            $$->filhos[1] = $7;
         }
 ;
 
@@ -394,6 +404,26 @@ void translate_tree(syntaticno *no){
             printf(")");
             break;
 
+        case NO_IF_SELECTION:
+            printf("\n\tif ");
+            translate_tree(no->filhos[0]);
+            printf(" {\n");
+            translate_tree(no->filhos[1]);
+            printf("\t}\n");
+            break;
+
+        case NO_IF_ELSE_SELECTION:
+            printf("\n\tif ");
+            translate_tree(no->filhos[0]);
+            printf(" {\n");
+            translate_tree(no->filhos[1]);
+            printf("\t} else {\n");
+            translate_tree(no->filhos[2]);
+            printf("\t}\n");
+            break;
+
+        case NO_DO_WHILE_ITERATION
+
         default:
             for(int i = 0; i < no->qtdFilhos; i++)
                 translate_tree(no->filhos[i]);
@@ -405,7 +435,7 @@ void translate_tree(syntaticno *no){
 
 void translate(syntaticno *no){
     //Aqui traduzo a entrada para linguagem Dart
-    printf("int main(){\n");
+    printf("void main(){\n");
     
     //vai percorrer a arvore formato esquerda -> direia -> raiz e vai imprimir o codigo dentro da função main()
     translate_tree(no);
