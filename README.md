@@ -1,11 +1,17 @@
-# Sintaxe AST 1 
+# Final project for Compilers class exam
 
-## O que é módulo e o que faremos neste módulo
-    - Alterar a gramática criada anteriormente para também aceitar programas com mais de um statement, ou seja, expressão aritimetica e atribuições nesse caso.
-    - O programa poderá ter uma quantidade ilimitada de atribuições.
-    - Imprimir essa estrutura em formato de arquivo .dot, ou seja, em formato de árvore que possamos renderizar pra depurar se a estrutura está correta
-    - Construção é feita por meio da tabela de símbolos que fizemos anteriormente
+## Summary
+    - Used compilers: Bison, Flex and Yacc.
+    - Bison version used: 3.7.6.
+    - Project made using WSL 1.
+    - Our raw input code is writed on the file **inputText.txt**.
+    - The translation from C language to Dart will be given from the terminal aswell as the graphic representation of the tree.
+    - You can acess the graphic representation of the tree on this website: [**Graphviz Online**][1] 
 
-## O que foi estudado ?
-    - EnteNdemos como passar atributos de token para o programa que reconhece a gramática.y
-    - Usar tais atributos para preencher uma tabela de símbolos simplificada
+## How to use
+    - I've created a makefile as a shortcut for all the commands in order to compile this project. Open the terminal, go to the project folder and type **make**.
+    - The output of this compilation will be a file named **cmp**.
+    - Now type **./cmp inputText.txt**.
+
+
+[1]: https://dreampuf.github.io/GraphvizOnline/#graph%20prog%20%7B%0D%0A%20%20%20%20%20%20%20%20%0D%0A%7D

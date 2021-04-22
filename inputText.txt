@@ -1,0 +1,20 @@
+e = 10
+k = e / 3
+
+if (a + b - 10 / 40 == 20) { 
+    d = d 
+} else { 
+    p = d 
+}
+
+if (a + b) { d = d }
+
+do {
+    add = add + 2
+} while (add != 10)
+
+while( lucas == lucas){
+    if ( polo == (2 || 10) ) {
+        polo = 100
+    }
+}

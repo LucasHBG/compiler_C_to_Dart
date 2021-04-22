@@ -11,7 +11,7 @@ int errorc = 0;
 
 enum sno_type { NO_GENERIC, NO_STMTS, NO_ATTRIB, NO_GETVAR,
 NO_CONST, NO_BINARY_OPER, NO_IF_SELECTION, NO_IF_ELSE_SELECTION,
-NO_DO_WHILE_ITERATION };
+NO_WHILE_ITERATION, NO_DO_WHILE_ITERATION, NO_FOR_ITERATION };
 
 typedef struct {
     char *nome;
@@ -134,6 +134,7 @@ STMT
         | SELECT_STMT
 
         | ITERATION_STMT
+
 ;
 
 SELECT_STMT 
@@ -187,7 +188,17 @@ SELECT_STMT
 ;
 
 ITERATION_STMT 
-        : DO '{' STMT '}' WHILE '(' EXPRESSION ')' {
+        : WHILE '(' EXPRESSION ')' '{' STMT '}' {
+            /*
+             * cria nó identificando o bloco com "while () {}"
+            */
+            $$ = novo_syntaticno("while_block", 2);
+            $$->type = NO_WHILE_ITERATION;
+            $$->filhos[0] = $3;
+            $$->filhos[1] = $6;
+        } 
+
+        | DO '{' STMT '}' WHILE '(' EXPRESSION ')' {
             /*
              * cria nó identificando o bloco com "do {} while ();"
             */
@@ -195,6 +206,17 @@ ITERATION_STMT
             $$->type = NO_DO_WHILE_ITERATION;
             $$->filhos[0] = $3;
             $$->filhos[1] = $7;
+        }
+
+        | FOR '(' EXPRESSION ';' EXPRESSION ';' EXPRESSION ')' '{' STMT '}' {
+            /*
+             * cria nó identificando o bloco com "for () {}"
+            */$$ = novo_syntaticno("for_block", 4);
+            $$->type = NO_FOR_ITERATION;
+            $$->filhos[0] = $3;
+            $$->filhos[1] = $5;
+            $$->filhos[2] = $7;
+            $$->filhos[3] = $10;
         }
 ;
 
@@ -377,7 +399,7 @@ void translate_tree(syntaticno *no){
     switch(no->type){
         case NO_ATTRIB:
             if (no->declara_var)
-                printf("\tint %s = ", no->filhos[0]->sim->nome);
+                printf("\tvar %s = ", no->filhos[0]->sim->nome);
             else
                 printf("\t %s = ", no->filhos[0]->sim->nome);
             
@@ -407,7 +429,7 @@ void translate_tree(syntaticno *no){
         case NO_IF_SELECTION:
             printf("\n\tif ");
             translate_tree(no->filhos[0]);
-            printf(" {\n");
+            printf(" {\n\t");
             translate_tree(no->filhos[1]);
             printf("\t}\n");
             break;
@@ -415,14 +437,30 @@ void translate_tree(syntaticno *no){
         case NO_IF_ELSE_SELECTION:
             printf("\n\tif ");
             translate_tree(no->filhos[0]);
-            printf(" {\n");
+            printf(" {\n\t");
             translate_tree(no->filhos[1]);
-            printf("\t} else {\n");
+            printf("\t} else {\n\t");
             translate_tree(no->filhos[2]);
             printf("\t}\n");
             break;
 
-        case NO_DO_WHILE_ITERATION
+        case NO_WHILE_ITERATION:
+            printf("\n\twhile ");
+            translate_tree(no->filhos[0]);
+            printf(" {\n\t");
+            translate_tree(no->filhos[1]);
+            printf("\n\t}\n");
+            break;
+
+        case NO_DO_WHILE_ITERATION:
+            printf("\n\tdo {\n\t");
+            //Entra no nó à esquerda, no caso é o STMT
+            translate_tree(no->filhos[0]);
+            printf("\t} while ");
+            //Entra no nó à direita, no caso é o EXPRESSION
+            translate_tree(no->filhos[1]);
+            printf(";\n");
+            break;
 
         default:
             for(int i = 0; i < no->qtdFilhos; i++)
@@ -440,7 +478,7 @@ void translate(syntaticno *no){
     //vai percorrer a arvore formato esquerda -> direia -> raiz e vai imprimir o codigo dentro da função main()
     translate_tree(no);
     
-    printf("}\n");
+    printf("\n}\n");
 }
 
 //Função que irá percorrer a tabela de simbolos e imprimir os encontrados
