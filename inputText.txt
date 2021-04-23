@@ -1,20 +1,26 @@
-e = 10
-k = e / 3
-
-if (a + b - 10 / 40 == 20) { 
-    d = d 
-} else { 
-    p = d 
-}
-
-if (a + b) { d = d }
+a = 40
+b = 40
+addFaltas = 0
+lucas = 0
+turma = 0
+nota = 0
 
 do {
-    add = add + 2
+    addFaltas = addFaltas + 2
 } while (add != 10)
 
-while( lucas == lucas){
-    if ( polo == (2 || 10) ) {
-        polo = 100
+if ( a == b) {
+    lucas = lucas + 50
+}
+
+if ( a == b) {
+    lucas = lucas + 50
+} else {
+    nota = 0
+}
+
+while( turma == 0){
+    if(nota < 5){
+        nota = nota + 1
     }
 }

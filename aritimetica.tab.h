@@ -64,7 +64,12 @@ extern int yydebug;
     AND_OP = 265,                  /* AND_OP  */
     OR_OP = 266,                   /* OR_OP  */
     EQ_OP = 267,                   /* EQ_OP  */
-    NE_OP = 268                    /* NE_OP  */
+    NE_OP = 268,                   /* NE_OP  */
+    GE_OP = 269,                   /* GE_OP  */
+    LE_OP = 270,                   /* LE_OP  */
+    MUL_ASSIGN = 271,              /* MUL_ASSIGN  */
+    SUB_ASSIGN = 272,              /* SUB_ASSIGN  */
+    ADD_ASSIGN = 273               /* ADD_ASSIGN  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -79,7 +84,7 @@ union YYSTYPE
     int valor;
     struct syntaticno *no;
 
-#line 83 "aritimetica.tab.h"
+#line 88 "aritimetica.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

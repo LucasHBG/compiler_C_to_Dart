@@ -6,28 +6,38 @@
 
 [ \t\n\r]               {}
 "//".*                  { /* ignora */ }
-"if"                    { return(IF);       }
-"else"                  { return(ELSE);     }
-"for"                   { return(FOR);      }
-"do"                    { return(DO);       }
-"while"                 { return(WHILE);    }
 
-"+"                     { return '+';       }
-"-"                     { return '-';       }
-"*"                     { return '*';       }
-"/"                     { return '/';       }
-"?"                     { return '?';       }
-"||"                    { return(OR_OP);    }
-"&&"                    { return(AND_OP);   }
-"=="                    { return(EQ_OP);    }
-"!="                    { return(NE_OP);    }
-";"                     { return ';';       }
-"{"                     { return '{';       }
-"("                     { return '(';       }
-")"                     { return ')';       }
-"}"                     { return '}';       }
+"if"                    { return(IF);           }
+"else"                  { return(ELSE);         }
+"for"                   { return(FOR);          }
+"do"                    { return(DO);           }
+"while"                 { return(WHILE);        }
 
-[0-9]+ { 
+"+"                     { return '+';           }
+"-"                     { return '-';           }
+"*"                     { return '*';           }
+"/"                     { return '/';           }
+"?"                     { return '?';           }
+">"                     { return '>';           }
+"<"                     { return '<';           }
+"||"                    { return(OR_OP);        }
+"&&"                    { return(AND_OP);       }
+"=="                    { return(EQ_OP);        }
+"!="                    { return(NE_OP);        }
+"<="			        { return(LE_OP);        }
+">="			        { return(GE_OP);        }
+"+="                    { return (ADD_ASSIGN);  }
+"-="                    { return (SUB_ASSIGN);  }
+"*="                    { return (MUL_ASSIGN);  }
+";"                     { return ';';           }
+"{"                     { return '{';           }
+"("                     { return '(';           }
+")"                     { return ')';           }
+"}"                     { return '}';           }
+
+[0-9]+ {
+    /*  Coloquei aqui temporariamente enquanto ainda nao implementei INC_OP e DEC_OP
+    */ 
     //usar atoi para converter de string para inteiro
     yylval.valor = atoi(yytext);
     return NUMBER;

@@ -72,13 +72,14 @@ void translate(syntaticno *root);
 
 %token NUMBER IDENTIFIER
 %token IF ELSE FOR DO WHILE
-%token AND_OP OR_OP EQ_OP NE_OP
+%token AND_OP OR_OP EQ_OP NE_OP GE_OP LE_OP
+%token MUL_ASSIGN SUB_ASSIGN ADD_ASSIGN
 
 //O tipo do token IDENTIFIER é o campo nome, ou seja, o atributo do token IDENTIFIER é o campo nome da %union criada nas linhas acima
 %type <nome> IDENTIFIER
 %type <valor> NUMBER
-%type <no> PROGRAM ARITHMETIC EXPRESSION TERM FACTOR STMTS STMT
-%type <no> SELECT_STMT ITERATION_STMT
+%type <no> PROGRAM ARITHMETIC EXPRESSION TERM FACTOR STMTS STMT LOGIC
+%type <no> SELECT_STMT ITERATION_STMT ASSIGNMENT_POSTFIX_EXPRESSIONS
 
 %start PROGRAM
 
@@ -90,9 +91,9 @@ PROGRAM
                 printf("%d erro(s) encontrados\n", errorc);
             else{
                 printf("*------------------------------------*\n");
-                printf(" Programa reconhecido sintaticamente!\n");
+                printf(" Programa reconhecido sintaticamente! \n");
                 printf("*------------------------------------*\n");
-                syntaticno *root = novo_syntaticno("prog", 1);
+                syntaticno *root = novo_syntaticno("program", 1);
                 root->filhos[0] = $1;
                 
                 // analise semantica
@@ -118,6 +119,15 @@ STMTS
 
 //Aqui pode se colocar novas funções, declaração de funções, e dentro dessas funções criar novos comandos como if, loop etc
 STMT 
+        : ASSIGNMENT_POSTFIX_EXPRESSIONS
+
+        | SELECT_STMT
+
+        | ITERATION_STMT
+
+;
+
+ASSIGNMENT_POSTFIX_EXPRESSIONS
         : IDENTIFIER '=' ARITHMETIC {
             simbolo *s = simbolo_existe($1);
             if(!s)
@@ -131,9 +141,44 @@ STMT
             $$->type = NO_ATTRIB;
         }
 
-        | SELECT_STMT
+        | IDENTIFIER ADD_ASSIGN ARITHMETIC {
+            simbolo *s = simbolo_existe($1);
+            if(!s)
+                s = simbolo_novo($1, IDENTIFIER);
+            
+            syntaticno *nv = novo_syntaticno($1, 0);
+            nv->sim = s;
+            $$ = novo_syntaticno("+=", 2);
+            $$->filhos[0] = nv;
+            $$->filhos[1] = $3;
+            $$->type = NO_ATTRIB;
+        }
 
-        | ITERATION_STMT
+        | IDENTIFIER SUB_ASSIGN ARITHMETIC {
+            simbolo *s = simbolo_existe($1);
+            if(!s)
+                s = simbolo_novo($1, IDENTIFIER);
+            
+            syntaticno *nv = novo_syntaticno($1, 0);
+            nv->sim = s;
+            $$ = novo_syntaticno("-=", 2);
+            $$->filhos[0] = nv;
+            $$->filhos[1] = $3;
+            $$->type = NO_ATTRIB;
+        }
+        
+        | IDENTIFIER MUL_ASSIGN ARITHMETIC {
+            simbolo *s = simbolo_existe($1);
+            if(!s)
+                s = simbolo_novo($1, IDENTIFIER);
+            
+            syntaticno *nv = novo_syntaticno($1, 0);
+            nv->sim = s;
+            $$ = novo_syntaticno("*=", 2);
+            $$->filhos[0] = nv;
+            $$->filhos[1] = $3;
+            $$->type = NO_ATTRIB;
+        }
 
 ;
 
@@ -245,35 +290,67 @@ EXPRESSION
             $$->filhos[1] = $3;
         }
 
+        | LOGIC { $$ = $1; }
+
+        | TERM { $$ = $1; }
+;
+
+LOGIC
+        : EXPRESSION '>' TERM {
+            $$ = novo_syntaticno(">", 2);
+            $$->type = NO_BINARY_OPER;
+            $$->filhos[0] = $1;
+            $$->filhos[1] = $3;
+        }
+
+        | EXPRESSION '<' TERM {
+            $$ = novo_syntaticno("<", 2);
+            $$->type = NO_BINARY_OPER;
+            $$->filhos[0] = $1;
+            $$->filhos[1] = $3;
+        }
+        
+        | EXPRESSION GE_OP TERM {
+            $$ = novo_syntaticno(">=", 2);
+            $$->type = NO_BINARY_OPER;
+            $$->filhos[0] = $1;
+            $$->filhos[1] = $3;
+        }
+
+        | EXPRESSION LE_OP TERM {
+            $$ = novo_syntaticno("<=", 2);
+            $$->type = NO_BINARY_OPER;
+            $$->filhos[0] = $1;
+            $$->filhos[1] = $3;
+        }
+        
         | EXPRESSION OR_OP TERM {
-           $$ = novo_syntaticno("||", 2);
-           $$->type = NO_BINARY_OPER;
-           $$->filhos[0] = $1;
-           $$->filhos[1] = $3;
+            $$ = novo_syntaticno("||", 2);
+            $$->type = NO_BINARY_OPER;
+            $$->filhos[0] = $1;
+            $$->filhos[1] = $3;
         }
 
         | EXPRESSION AND_OP TERM {
-           $$ = novo_syntaticno("&&", 2);
-           $$->type = NO_BINARY_OPER;
-           $$->filhos[0] = $1;
-           $$->filhos[1] = $3;
+            $$ = novo_syntaticno("&&", 2);
+            $$->type = NO_BINARY_OPER;
+            $$->filhos[0] = $1;
+            $$->filhos[1] = $3;
         }
 
         | EXPRESSION EQ_OP TERM {
-           $$ = novo_syntaticno("==", 2);
-           $$->type = NO_BINARY_OPER;
-           $$->filhos[0] = $1;
-           $$->filhos[1] = $3;
+            $$ = novo_syntaticno("==", 2);
+            $$->type = NO_BINARY_OPER;
+            $$->filhos[0] = $1;
+            $$->filhos[1] = $3;
         }
 
         | EXPRESSION NE_OP TERM {
-           $$ = novo_syntaticno("!=", 2);
-           $$->type = NO_BINARY_OPER;
-           $$->filhos[0] = $1;
-           $$->filhos[1] = $3;
+            $$ = novo_syntaticno("!=", 2);
+            $$->type = NO_BINARY_OPER;
+            $$->filhos[0] = $1;
+            $$->filhos[1] = $3;
         }
-
-        | TERM { $$ = $1; }
 ;
 
 TERM 
